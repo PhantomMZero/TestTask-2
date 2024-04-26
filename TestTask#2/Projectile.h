@@ -17,7 +17,7 @@ public:
 	//double getSpeedOfProjectile(int t);//Определение скорости тела
 	//double getCoordinatesOnTrajectory(int t);//Определение координат тела с секундной точностью
 	double getCoordinatesOfDestination();//Определение точки падения
-	// getMass 1. Двигатель включен, 2. Двигатель выключен
+	void getMass(); //1. Двигатель включен, 2. Двигатель выключен
 	void exportToXls();
 private:
 	AtmosphericParameters atmParameters;
@@ -34,6 +34,10 @@ private:
 	double y0=0;//y start coordinate
 	double xOfDestination=0;
 	double yOfDestination=0;
+	bool engineStatus = false;
+	double fuelMass = 0.5;//0.5kg
+	double getFuelMassDif(double dt);//Функция изменения массы топлива
+	double fThrust = 500; //Н*с
 	double gr = 45; //degree
 	double rad = gr * 3.14 / 180;
 	double dt = 0.01;

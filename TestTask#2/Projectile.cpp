@@ -9,6 +9,8 @@
 // равной диаметру тела, изготовленное из конструкционной стали, 
 // запускается из баллистической установки со скоростьюV0, равной 700 м/сек. 
 // Ствол баллистической установки расположен под углом 45° к горизонту.
+//Тело имеет реактивный двигатель.Масса заряда твёрдого топлива – 0, 5 кг.Реактивный двигатель включается через 5 секунд после начала движения тела.Время работы двигателя – 0, 5 секунды.
+//Изменение массы заряда твёрдого топлива – равномерное.Импульс тяги реактивного двигателя – 500 Н·с.Вектор тяги направлен по оси тела в направлении его движения.
 
 
 //Что требуется определить :
@@ -31,6 +33,7 @@ void Projectile::calculate()
 	t = 0;
 	teta1 = rad;
 	trajectory.push_back({ x1, y1, V1, t });
+	mass += fuelMass;
 	while (true) {
 		c=findCCoef(calculateMach(V1, calculateVSound(atmParameters.findAirTemperature(y1))));
 		calculateAirResistanceForce(y1, V1);
@@ -47,6 +50,14 @@ void Projectile::calculate()
 			std::cout << "x= " << x2 << "m\n";
 			std::cout << "t= " << t << "sec\n-------------------------------------------------------\n";
 			break;
+		}
+		if (t >= 5 && t < 5.5) {
+			engineStatus = true;
+			V2 += fThrust / mass * dt;
+			mass -= fuelMass - getFuelMassDif(dt);
+		}
+		else {
+			engineStatus = false;
 		}
 		V1 = V2;
 		teta1 = teta2;
@@ -111,7 +122,14 @@ double Projectile::calculateY(double y1, double teta1, double V1)//Расчет коорди
 	return y1 + (V1 * sin(teta1)) * dt;
 }
 
-double Projectile::findCCoef(double mach) {//Нахождение силы лобового сопротивления
+double Projectile::getFuelMassDif(double dt)
+{
+	if (engineStatus == true) {
+		return fuelMass - (5.5 - 5) / 0.5 * dt;
+	}
+}
+
+double Projectile::findCCoef(double mach) {//Нахождение силы лобового сопротивления для лямбда=1,5
 	if (mach >= 1 && mach <= 1.2) {
 		double right = 0.40;
 		double left = 0.26;
@@ -123,6 +141,7 @@ double Projectile::findCCoef(double mach) {//Нахождение силы лобового сопротивле
 		double left = 0.40;
 		return left + (mach - 1.2) / (2 - 1.2) * (0.29 - 0.40);
 	}
+	if (mach > 2)return 0.29;
 }
 
 double Projectile::calculateVSound(double t)
@@ -151,8 +170,6 @@ void Projectile::exportToXls()
 			<< trajectory[i][2] << ','
 			<< trajectory[i][3] << '\n';
 	}
-
-
 }
 
 
@@ -171,4 +188,8 @@ void Projectile::exportToXls()
 double Projectile::getCoordinatesOfDestination()
 {
 	if (xOfDestination!=0) return xOfDestination;
+}
+
+void Projectile::getMass()
+{
 }
